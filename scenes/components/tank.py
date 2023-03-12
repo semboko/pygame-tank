@@ -11,107 +11,11 @@ from pymunk.vec2d import Vec2d
 from scenes.components.ball import Ball
 from scenes.components.bullet import Bullet
 from scenes.utils import convert
+from scenes.components.visual_part import VisualPart
 
 TANK_WIDTH = 250
 TANK_HEIGHT = 74
 WHEEL_R = 9
-
-
-def raw_to_poly(
-    raw: Union[Tuple[Vec2d, ...], Tuple[Tuple[int, int], ...]], width: int, height: int
-) -> List[Tuple[int, int]]:
-    return [(int(vx - width / 2), int(height / 2 - vy)) for vx, vy in raw]
-
-
-def unpack_coords(verts: Sequence[Vec2d]) -> Tuple[List[int], List[int]]:
-    xs: List[int] = []
-    ys: List[int] = []
-    for x, y in verts:
-        xs.append(int(x))
-        ys.append(int(y))
-    return xs, ys
-
-
-def get_center(verts: Sequence[Vec2d]) -> Vec2d:
-    xs, ys = unpack_coords(verts)
-    return Vec2d(sum(xs) / len(xs), sum(ys) / len(ys))
-
-
-def get_width(verts: Sequence[Vec2d]) -> int:
-    xs, _ = unpack_coords(verts)
-    return max(xs) - min(xs)
-
-
-def get_height(verts: Sequence[Vec2d]) -> int:
-    _, ys = unpack_coords(verts)
-    return max(ys) - min(ys)
-
-
-class VisualPart:
-    def __init__(
-        self,
-        left_x: int,
-        top_y: int,
-        raw_verts: Tuple[Vec2d, ...],
-        cf: ShapeFilter,
-        image_path: str,
-        space: Space,
-        debug: bool = False,
-    ):
-        """
-        :param left_x: Global leftmost x-coordinate of the shape
-        :param top_y: Global topmost y-coordinate of the shape
-        :param raw_verts: Figma-based relative coordinates of the shape
-        :param cf: Collision filter for the shape
-        :param space: Space to which the shape will be placed after creating
-        """
-        self.collision_filter = cf
-        self.space = space
-
-        self.width, self.height = self.get_obj_dimensions(raw_verts)
-
-        self.body = self.generate_body(left_x, top_y)
-        self.shape = self.generate_shape(raw_verts, cf)
-
-        self.image = pygame.image.load(image_path)
-        self.rect = self.image.get_rect()
-
-        self.debug = debug
-
-    def get_obj_dimensions(self, raw_verts: Tuple[Vec2d, ...]):
-        return get_width(raw_verts), get_height(raw_verts)
-
-    def generate_body(self, left_x: int, top_y: int) -> Body:
-        cx, cy = left_x + self.width / 2, top_y - self.height / 2
-        body = Body()
-        body.position = cx, cy
-        self.space.add(body)
-        return body
-
-    def generate_shape(self, raw_verts: Tuple[Vec2d, ...], cf: ShapeFilter) -> Shape:
-        shape = Poly(self.body, vertices=raw_to_poly(raw_verts, self.width, self.height))
-        shape.density = 1
-        shape.filter = cf
-        self.space.add(shape)
-        return shape
-
-    def debug_draw(self, display: Surface):
-        h = display.get_height()
-        # Draw the shape
-        verts = [convert(self.body.local_to_world(v), h) for v in self.shape.get_vertices()]
-        draw.polygon(display, (255, 255, 0), verts, 1)
-        # Draw the center of mass
-        draw.circle(display, (255, 255, 0), convert(self.body.position, h), 2, 1)
-
-    def render(self, display: Surface):
-        h = display.get_height()
-        last_rect = self.image.get_rect()
-        rotated_image = pygame.transform.rotate(self.image, degrees(self.body.angle))
-        new_rect = rotated_image.get_rect(center=convert(self.body.position, h))
-        display.blit(rotated_image, new_rect)
-
-        if self.debug:
-            self.debug_draw(display)
 
 
 class TankBase(VisualPart):
@@ -237,23 +141,7 @@ class TankSoundEffects:
         self.engine_sound = self.engine_1
 
     def update(self, speed: float = 0):
-        diff = abs(int(self._current_speed - speed))
-        # if diff > 1:
-        #     diff = 1
-        #
-        # if self._last_diff != diff:
-        #     self.engine_sound.stop()
-        #     if diff == 1:
-        #         self.engine_sound = self.engine_2
-        #     if diff == 0:
-        #         self.engine_sound = self.engine_1
-        #     self.engine_sound.play(0)
-        #
-        # self._current_speed = speed
-        # self._last_diff = diff
-        #
-        # if not pygame.mixer.get_busy():
-        #     self.engine_sound.play(0)
+        pass
 
 
 class Tank:
@@ -262,6 +150,7 @@ class Tank:
     wheels: Sequence[TankWheel]
     motor: SimpleMotor
     turret_shape: Shape
+    gun_joint: RotaryLimitJoint
 
     def __init__(self, x, y, space: Space, debug: bool = False):
         self.collision_filter = ShapeFilter(group=0b1)
@@ -282,21 +171,21 @@ class Tank:
         self.sound_effects = TankSoundEffects()
 
     def get_wheels(self) -> Sequence[TankWheel]:
-        wheel_xs = (38, 57, 76, 95, 115, 135, 160)
-        wheel_y = self.top_y - 55
+        wheel_xs = (30, 52, 72, 95, 115, 135, 160)
+        wheel_y = self.top_y - 50
         wheels = []
         for wheel_x in wheel_xs:
             wheel_x = self.left_x + wheel_x
             new_wheel = TankWheel(wheel_x, wheel_y, self.collision_filter, self.space)
             new_wheel.attach_to(self.tank_base.body)
             wheels.append(new_wheel)
-        front_wheel = TankWheel(self.left_x + 184, self.top_y - 50, self.collision_filter, self.space)
+        front_wheel = TankWheel(self.left_x + 180, self.top_y - 40, self.collision_filter, self.space)
         front_wheel.attach_to(self.tank_base.body)
         wheels.append(front_wheel)
         return wheels
 
     def get_motor_wheel(self) -> MotorWheel:
-        mw = MotorWheel(self.left_x + 14, self.top_y - 41, self.collision_filter, self.space)
+        mw = MotorWheel(self.left_x + 10, self.top_y - 36, self.collision_filter, self.space)
         mw.attach_to(self.tank_base.body)
         return mw
 
@@ -345,10 +234,10 @@ class Tank:
 
     def update_velocity(self, keys: Sequence[bool]):
         if keys[pygame.K_d]:
-            self.motor.rate += 1
+            self.motor.rate += 2
             return
         if keys[pygame.K_a]:
-            self.motor.rate -= 1
+            self.motor.rate -= 2
             return
 
         self.motor.rate *= 0.8
