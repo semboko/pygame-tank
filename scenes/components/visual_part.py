@@ -70,11 +70,13 @@ class VisualPart:
         # Draw the center of mass
         draw.circle(display, (255, 255, 0), convert(self.body.position, h), 2, 1)
 
-    def render(self, display: Surface):
+    def get_render_position(self, camera_shift: pymunk.Vec2d = pymunk.Vec2d(0, 0)) -> pymunk.Vec2d:
+        return self.body.position + camera_shift
+
+    def render(self, display: Surface, camera_shift: pymunk.Vec2d):
         h = display.get_height()
-        last_rect = self.image.get_rect()
         rotated_image = pygame.transform.rotate(self.image, degrees(self.body.angle))
-        new_rect = rotated_image.get_rect(center=convert(self.body.position, h))
+        new_rect = rotated_image.get_rect(center=convert(self.get_render_position(camera_shift), h))
         display.blit(rotated_image, new_rect)
 
         if self.debug:

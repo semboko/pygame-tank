@@ -2,6 +2,7 @@ from math import cos, sin
 from random import randint
 from typing import Tuple
 
+import pymunk
 from pygame.surface import Surface
 from pymunk import Body, ShapeFilter, Space
 
@@ -41,8 +42,8 @@ class Bullet(Ball):
         return force
 
     def is_outside(self, display: Surface) -> bool:
-        x, y = self.body.position
-        if y < 0 or x < 0 or x > display.get_width():
+        _, y = self.body.position
+        if y < 0:
             return True
         return False
 
@@ -58,6 +59,6 @@ class Bullet(Ball):
             return False
         return True
 
-    def render(self, display: Surface) -> None:
+    def render(self, display: Surface, camera_shift: pymunk.Vec2d = pymunk.Vec2d(0, 0)) -> None:
         if self._flying:
-            super().render(display)
+            super().render(display, camera_shift)

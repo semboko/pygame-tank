@@ -2,6 +2,7 @@ from random import random
 
 import pygame
 from pygame.event import Event
+from pymunk import Vec2d
 
 from scenes.abstract import AbstractPymunkScene
 from scenes.components.ball import Ball
@@ -20,11 +21,13 @@ class TankScene(AbstractPymunkScene):
         super().reset_scene()
         pygame.mixer.stop()
         self.tank = Tank(250, 460, self.space, debug=False)
-        self.floor = RandomFloor(0, self.display.get_width(), 0, 30, 30, self.space)
+        self.floor = RandomFloor(0, self.display.get_width(), 0, 80, 20, self.space)
         self.objects.extend((self.tank, self.floor))
 
     def update(self):
         super().update()
+        self.camera_shift = self.tank.get_camera_shift()
+        self.floor.update(self.camera_shift)
         self.tank.update()
         self.update_bullets()
         self.update_balls()
@@ -49,32 +52,25 @@ class TankScene(AbstractPymunkScene):
                 Rect,
                 Bullet,
             ):
-                _, y = obj.body.position
-                if y < 0:
+                if obj.body.position.y < 0:
                     self.space.remove(obj.body, obj.shape)
                     self.objects.remove(obj)
                     print(f"Obj {type(obj)} is removed")
 
     def handle_event(self, event: Event) -> None:
         if event.type == pygame.KEYDOWN:
-            if event.key == ord("r"):
+            if event.key == pygame.K_r:
                 self.reset_scene()
 
-            # Whitespace
-            if event.key == 32:
+            if event.key == pygame.K_SPACE:
                 bullet = self.tank.shot()
                 self.objects.append(bullet)
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             h = self.display.get_height()
-            x, y = event.dict["pos"]
-            if event.dict["button"] == 1:
-                obj = Rect(*convert((x, y), h), 200, 10, self.space, color=(255, 255, 0))
-            else:
-                obj = Ball(*convert((x, y), h), 10, self.space, color=(55, 252, 10))
+            pos = Vec2d(*event.pos) - self.camera_shift
+            obj = Ball(*convert(pos, h), 10, self.space, color=(55, 252, 10))
             obj.shape.friction = 1
             obj.shape.density = 0.1
             obj.body.angle = 3.14 * random()
-            # obj.shape.elasticity = 1
-            # rect.body.mass = 100
             self.objects.append(obj)

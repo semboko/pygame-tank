@@ -1,16 +1,12 @@
-from math import degrees
-from typing import List, Sequence, Tuple, Union
+from typing import Sequence, Tuple
 
 import pygame
 import pymunk
-from pygame import draw
 from pygame.surface import Surface
-from pymunk import Body, GearJoint, PivotJoint, Poly, RotaryLimitJoint, Shape, ShapeFilter, SimpleMotor, Space
+from pymunk import Body, GearJoint, PivotJoint, RotaryLimitJoint, Shape, ShapeFilter, SimpleMotor, Space
 from pymunk.vec2d import Vec2d
 
-from scenes.components.ball import Ball
 from scenes.components.bullet import Bullet
-from scenes.utils import convert
 from scenes.components.visual_part import VisualPart
 
 TANK_WIDTH = 250
@@ -170,6 +166,8 @@ class Tank:
 
         self.sound_effects = TankSoundEffects()
 
+        self.initial_x = self.tank_base.body.position.x
+
     def get_wheels(self) -> Sequence[TankWheel]:
         wheel_xs = (30, 52, 72, 95, 115, 135, 160)
         wheel_y = self.top_y - 50
@@ -219,7 +217,7 @@ class Tank:
         self.space.add(bullet_holder)
         return bullet, bullet_holder
 
-    def shot(self) -> Ball:
+    def shot(self) -> Bullet:
         self.sound_effects.shot.play()
         try:
             self.space.remove(self.bullet_holder)
@@ -251,24 +249,21 @@ class Tank:
             self.gun_joint.min += 0.01
             self.gun_joint.max += 0.01
 
+    def get_camera_shift(self) -> Vec2d:
+        current_x = self.tank_base.body.position.x
+        return Vec2d(self.initial_x - current_x, 0)
+
     def update(self):
         keys = pygame.key.get_pressed()
         self.update_velocity(keys)
         self.update_gun_angle(keys)
         self.sound_effects.update(speed=self.motor.rate)
 
-    def render(self, display: Surface):
-        draw.circle(
-            display,
-            (255, 255, 0),
-            convert((self.left_x + TANK_WIDTH // 2, self.top_y - TANK_HEIGHT // 2), display.get_height()),
-            5,
-            1,
-        )
+    def render(self, display: Surface, camera_shift: Vec2d):
         for wheel in self.wheels:
-            wheel.render(display)
-        self.motor_wheel.render(display)
-        self.tank_base.render(display)
-        self.gun.render(display)
-        self.bullet.render(display)
-        self.turret.render(display)
+            wheel.render(display, camera_shift)
+        self.motor_wheel.render(display, camera_shift)
+        self.tank_base.render(display, camera_shift)
+        self.gun.render(display, camera_shift)
+        self.bullet.render(display, camera_shift)
+        self.turret.render(display, camera_shift)

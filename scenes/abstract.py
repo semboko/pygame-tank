@@ -28,6 +28,7 @@ class AbstractScene(ABC):
 class AbstractPymunkScene(AbstractScene):
     space: pymunk.Space
     objects: List[Any]
+    camera_shift: pymunk.Vec2d
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -41,6 +42,7 @@ class AbstractPymunkScene(AbstractScene):
         self.space = pymunk.Space()
         self.space.gravity = 0, -1000  # Set the friction coefficient of the space object
         self.space.damping = 0.5
+        self.camera_shift = pymunk.Vec2d(0, 0)
 
     def update(self):
         self.space.step(1 / self.fps)
@@ -48,4 +50,4 @@ class AbstractPymunkScene(AbstractScene):
     def render(self):
         self.display.fill((235, 146, 52))
         for obj in self.objects:
-            obj.render(self.display)
+            obj.render(self.display, self.camera_shift)

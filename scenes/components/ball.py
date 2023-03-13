@@ -28,11 +28,12 @@ class Ball:
         self.color = color
         space.add(self.body, self.shape)
 
-    def render(self, display: Surface) -> None:
+    def render(self, display: Surface, camera_shift: pymunk.Vec2d = pymunk.Vec2d(0, 0)) -> None:
         h = display.get_height()
-        pygame.draw.circle(display, self.color, convert(self.body.position, h), self.r)
+        pos = self.body.position + camera_shift
+        pygame.draw.circle(display, self.color, convert(pos, h), self.r)
         alpha = self.body.angle
         line_end = cos(alpha) * self.r, sin(alpha) * self.r
         pygame.draw.line(
-            display, (0, 0, 0), convert(self.body.position, h), convert(self.body.local_to_world(line_end), h), 1
+            display, (0, 0, 0), convert(pos, h), convert(self.body.local_to_world(line_end) + camera_shift, h), 1
         )
