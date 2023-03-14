@@ -267,3 +267,4 @@ class Tank:
         self.gun.render(display, camera_shift)
         self.bullet.render(display, camera_shift)
         self.turret.render(display, camera_shift)
+        self.bullet.render(display, camera_shift)

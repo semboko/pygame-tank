@@ -44,7 +44,6 @@ class RandomFloor:
             ))
 
         val = shift.x + rs.shape.b.x - 1700
-        print(val)
         if val < 0:
             self.segments.append(self.create_segment(
                 (rs.shape.b.x, rs.shape.b.y),

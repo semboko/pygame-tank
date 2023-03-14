@@ -33,6 +33,7 @@ class Bullet(Ball):
         self.remove(space)
 
     def start(self, angle: float) -> Tuple[float, float]:
+        self.body.angle = 0
         self._flying = True
         r = self.shape.radius
         x = r * cos(angle)
