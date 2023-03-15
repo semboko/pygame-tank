@@ -69,7 +69,8 @@ class TankScene(AbstractPymunkScene):
         if event.type == pygame.MOUSEBUTTONDOWN:
             h = self.display.get_height()
             pos = Vec2d(*event.pos) - self.camera_shift
-            obj = Ball(*convert(pos, h), 10, self.space, color=(55, 252, 10))
+            obj = Ball(*convert(pos, h), 5, self.space, color=(55, 252, 10))
+            obj.body.mass = 50000
             obj.shape.friction = 1
             obj.shape.density = 0.1
             obj.body.angle = 3.14 * random()
