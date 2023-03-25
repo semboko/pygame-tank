@@ -8,6 +8,7 @@ from scenes.constraints import ConstraintScene
 from scenes.tank import TankScene
 from scenes.car import CarScene
 from scenes.carscene import CarScene
+from scenes.particles import ParticleScene
 
 
 class Game:
