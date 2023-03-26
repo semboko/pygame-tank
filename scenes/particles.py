@@ -1,8 +1,10 @@
-from scenes.abstract import AbstractPymunkScene
+from typing import List, Tuple
+
 from pygame.event import Event
-from typing import Tuple, List
-from pymunk import Space, Body, Shape, Vec2d
 from pygame.surface import Surface
+from pymunk import Body, Shape, Space, Vec2d
+
+from scenes.abstract import AbstractPymunkScene
 from scenes.components.ball import Ball
 from scenes.components.random_floor import RandomFloor
 
@@ -39,7 +41,11 @@ class ParticlePool:
 
     def update_particles(self) -> None:
         print(f"Particles {len(self.particles)}")
-        p = Particle(*self.source, 3, self.space, )
+        p = Particle(
+            *self.source,
+            3,
+            self.space,
+        )
         p.shape.elasticity = 1
         p.shape.friction = 1
         p.body.velocity_func = self.limit_velocity

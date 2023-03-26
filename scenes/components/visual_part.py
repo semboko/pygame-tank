@@ -10,8 +10,7 @@ from pymunk.vec2d import Vec2d
 
 from scenes.components.ball import Ball
 from scenes.components.bullet import Bullet
-from scenes.utils import raw_to_poly, get_height, get_width
-from scenes.utils import convert
+from scenes.utils import convert, get_height, get_width, raw_to_poly
 
 
 class VisualPart:

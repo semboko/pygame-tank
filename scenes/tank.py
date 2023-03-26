@@ -7,21 +7,21 @@ from pymunk import Vec2d
 from scenes.abstract import AbstractPymunkScene
 from scenes.components.ball import Ball
 from scenes.components.bullet import Bullet
-from scenes.components.random_floor import RandomFloor
 from scenes.components.rect import Rect
 from scenes.components.tank import Tank
+from scenes.components.terrain import Terrain
 from scenes.utils import convert
 
 
 class TankScene(AbstractPymunkScene):
     tank: Tank
-    floor: RandomFloor
+    floor: Terrain
 
     def reset_scene(self):
         super().reset_scene()
         pygame.mixer.stop()
-        self.tank = Tank(250, 460, self.space, debug=False)
-        self.floor = RandomFloor(0, self.display.get_width(), 0, 80, 20, self.space)
+        self.tank = Tank(250, 360, self.space, debug=False)
+        self.floor = Terrain(Vec2d(0, 0), Vec2d(self.display.get_width(), 0), 100, 300, self.space)
         self.objects.extend((self.tank, self.floor))
 
     def update(self):
@@ -69,7 +69,7 @@ class TankScene(AbstractPymunkScene):
         if event.type == pygame.MOUSEBUTTONDOWN:
             h = self.display.get_height()
             pos = Vec2d(*event.pos) - self.camera_shift
-            obj = Ball(*convert(pos, h), 5, self.space, color=(55, 252, 10))
+            obj = Ball(*convert(pos, h), 10, self.space, color=(55, 252, 10))
             obj.body.mass = 50000
             obj.shape.friction = 1
             obj.shape.density = 0.1

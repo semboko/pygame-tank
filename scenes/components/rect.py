@@ -9,10 +9,17 @@ from scenes.utils import convert
 
 class Rect:
     def __init__(
-        self, x: int, y: int, width: int, height: int, space: pymunk.Space, color: Tuple[int, int, int] = (255, 0, 0)
+        self,
+        x: int,
+        y: int,
+        width: int,
+        height: int,
+        space: pymunk.Space,
+        color: Tuple[int, int, int] = (255, 0, 0),
+        btype: int = pymunk.Body.DYNAMIC,
     ) -> None:
         self.color = color
-        self.body = pymunk.Body()
+        self.body = pymunk.Body(body_type=btype)
         self.body.position = x, y
         verts = (
             (-width // 2, -height // 2),
@@ -24,7 +31,7 @@ class Rect:
         self.shape.density = 1
         space.add(self.body, self.shape)
 
-    def render(self, display: Surface) -> None:
+    def render(self, display: Surface, camera_shift: pymunk.Vec2d = pymunk.Vec2d(0, 0)) -> None:
         h = display.get_height()
-        verts = [convert(self.body.local_to_world(v), h) for v in self.shape.get_vertices()]
+        verts = [convert(self.body.local_to_world(v) + camera_shift, h) for v in self.shape.get_vertices()]
         pygame.draw.polygon(display, self.color, verts)

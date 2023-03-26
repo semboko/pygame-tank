@@ -38,17 +38,21 @@ class RandomFloor:
         ls = self.segments[0]
         rs = self.segments[-1]
         if ls.shape.a.x < shift.x:
-            self.segments.insert(0, self.create_segment(
-                (ls.shape.a.x - self.seg_width, randint(self.min_y, self.max_y)),
-                (ls.shape.a.x, ls.shape.a.y),
-            ))
+            self.segments.insert(
+                0,
+                self.create_segment(
+                    (ls.shape.a.x - self.seg_width, randint(self.min_y, self.max_y)),
+                    (ls.shape.a.x, ls.shape.a.y),
+                ),
+            )
 
         val = shift.x + rs.shape.b.x - 1700
         if val < 0:
-            self.segments.append(self.create_segment(
-                (rs.shape.b.x, rs.shape.b.y),
-                (rs.shape.b.x + self.seg_width, randint(self.min_y, self.max_y))
-            ))
+            self.segments.append(
+                self.create_segment(
+                    (rs.shape.b.x, rs.shape.b.y), (rs.shape.b.x + self.seg_width, randint(self.min_y, self.max_y))
+                )
+            )
 
     def render(self, display: Surface, camera_shift: pymunk.Vec2d) -> None:
         h = display.get_height()
