@@ -32,18 +32,22 @@ class TankScene(AbstractPymunkScene):
         self.update_bullets()
         self.update_balls()
 
+        self.handle_pressed(pygame.key.get_pressed())
+
     def update_bullets(self):
         for obj in self.objects:
             if not isinstance(obj, Bullet):
                 continue
-            if obj.is_outside(self.display):
-                obj.remove(self.space)
-                self.objects.remove(obj)
+            bullet = obj
+            if bullet.is_outside(self.display):
+                bullet.remove(self.space)
+                self.objects.remove(bullet)
                 continue
-            if obj.ready_to_explode(self.space):
+            if bullet.ready_to_explode(self.space):
                 self.tank.sound_effects.explosion.play()
-                obj.explode(self.space)
-                self.objects.remove(obj)
+                self.floor.detach_tops(bullet.body.position, 30)
+                bullet.explode(self.space)
+                self.objects.remove(bullet)
 
     def update_balls(self):
         for obj in self.objects:
@@ -56,6 +60,9 @@ class TankScene(AbstractPymunkScene):
                     self.space.remove(obj.body, obj.shape)
                     self.objects.remove(obj)
                     print(f"Obj {type(obj)} is removed")
+
+    def handle_pressed(self, keys) -> None:
+        pass
 
     def handle_event(self, event: Event) -> None:
         if event.type == pygame.KEYDOWN:

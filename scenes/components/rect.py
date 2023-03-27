@@ -5,6 +5,7 @@ import pymunk
 from pygame.surface import Surface
 
 from scenes.utils import convert
+from math import inf
 
 
 class Rect:
@@ -17,7 +18,9 @@ class Rect:
         space: pymunk.Space,
         color: Tuple[int, int, int] = (255, 0, 0),
         btype: int = pymunk.Body.DYNAMIC,
+        lifespan: float = inf,
     ) -> None:
+        self.space = space
         self.color = color
         self.body = pymunk.Body(body_type=btype)
         self.body.position = x, y
@@ -29,7 +32,13 @@ class Rect:
         )
         self.shape = pymunk.Poly(self.body, verts)
         self.shape.density = 1
+        self.lifespan = lifespan
         space.add(self.body, self.shape)
+
+    def update(self):
+        self.lifespan -= 1
+        if self.lifespan <= 0:
+            self.space.remove(self.body, self.shape)
 
     def render(self, display: Surface, camera_shift: pymunk.Vec2d = pymunk.Vec2d(0, 0)) -> None:
         h = display.get_height()
