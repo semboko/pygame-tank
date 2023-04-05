@@ -1,3 +1,4 @@
+from math import inf
 from typing import Tuple
 
 import pygame
@@ -5,7 +6,6 @@ import pymunk
 from pygame.surface import Surface
 
 from scenes.utils import convert
-from math import inf
 
 
 class Rect:

@@ -1,16 +1,13 @@
 from typing import List
 
 import pymunk
-from noise.perlin import BaseNoise, SimplexNoise
-from pygame import draw
+from noise.perlin import SimplexNoise
 from pygame.surface import Surface
 from pymunk.body import Body
 from pymunk.space import Space
 from pymunk.vec2d import Vec2d
 
 from scenes.components.rect import Rect
-from scenes.components.segment import Segment
-from scenes.utils import convert
 
 Y_BOTTOM = 300
 
@@ -39,7 +36,7 @@ class TerrainSegment:
         x, top_y = top.body.position
         width = self.width
         height = Y_BOTTOM - top.shape.bb.bottom
-        y = top.shape.bb.bottom - height//2
+        y = top.shape.bb.bottom - height // 2
         return Rect(x, y, width, height, self.space, btype=Body.STATIC)
 
     def remove_from_space(self):
@@ -56,7 +53,7 @@ class TerrainSegment:
     def split_off(self):
         ubp = self.underlying_brick.body.position
         ubh = abs(self.underlying_brick.shape.bb.bottom - self.underlying_brick.shape.bb.top)
-        new_top_coord = Vec2d(ubp.x, ubp.y + ubh//2 - self.height//2)
+        new_top_coord = Vec2d(ubp.x, ubp.y + ubh // 2 - self.height // 2)
         self.top_brick = self.create_top_brick(new_top_coord)
         self.space.remove(self.underlying_brick.body, self.underlying_brick.shape)
         self.underlying_brick = self.create_underlying_brick(self.top_brick)
