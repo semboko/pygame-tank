@@ -4,6 +4,7 @@ import pygame
 
 from scenes.abstract import AbstractScene
 from scenes.tank import TankScene
+from scenes.particles import ParticleScene
 
 
 class Game:

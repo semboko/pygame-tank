@@ -26,7 +26,7 @@ class TerrainSegment:
             self.width,
             self.height,
             self.space,
-            color=(255, 255, 0),
+            color=(50, 50, 50),
             btype=Body.STATIC,
         )
         r.shape.friction = 1
@@ -37,7 +37,7 @@ class TerrainSegment:
         width = self.width
         height = Y_BOTTOM - top.shape.bb.bottom
         y = top.shape.bb.bottom - height // 2
-        return Rect(x, y, width, height, self.space, btype=Body.STATIC)
+        return Rect(x, y, width, height, self.space, (100, 100, 100), btype=Body.STATIC)
 
     def remove_from_space(self):
         try:
@@ -101,7 +101,7 @@ class Terrain:
         #         (ls.shape.a.x, ls.shape.a.y),
         #     ))
 
-        val = shift.x + rs.top_brick.body.position.x - 1700
+        val = shift.x + rs.top_brick.body.position.x - 2100
         if val < 0:
             ax, ay = rs.top_brick.body.position
             bx = ax + self.step
