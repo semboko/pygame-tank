@@ -12,6 +12,7 @@ from scenes.components.rect import Rect
 from scenes.components.tank import Tank
 from scenes.components.terrain import Terrain
 from scenes.utils import convert
+from scenes.components.explosion import Explosion
 
 
 class Duck(Ball):
@@ -26,13 +27,15 @@ class Duck(Ball):
 class TankScene(AbstractPymunkScene):
     tank: Tank
     floor: Terrain
+    explosion: Explosion
 
     def reset_scene(self):
         super().reset_scene()
         pygame.mixer.stop()
         self.tank = Tank(250, 360, self.space, debug=False)
         self.floor = Terrain(Vec2d(0, 0), Vec2d(self.display.get_width(), 0), 100, 300, self.space)
-        self.objects.extend((self.tank, self.floor))
+        self.explosion = Explosion("./scenes/assets/explosion_tiles.png", 64)
+        self.objects.extend((self.tank, self.floor, self.explosion))
 
     def update(self):
         super().update()
@@ -41,7 +44,7 @@ class TankScene(AbstractPymunkScene):
         self.tank.update()
         self.update_bullets()
         self.update_balls()
-
+        self.explosion.update()
         self.handle_pressed(pygame.key.get_pressed())
 
     def update_bullets(self):
@@ -80,8 +83,10 @@ class TankScene(AbstractPymunkScene):
                 self.reset_scene()
 
             if event.key == pygame.K_SPACE:
-                bullet = self.tank.shot()
-                self.objects.append(bullet)
+                if not self.explosion.active:
+                    bullet = self.tank.shot()
+                    self.explosion.play(convert(bullet.body.position, self.display.get_height()))
+                    self.objects.append(bullet)
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             h = self.display.get_height()
